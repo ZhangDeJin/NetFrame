@@ -1,5 +1,7 @@
 package com.zdj.net_frame.implementations;
 
+
+import com.zdj.net_frame.common.HttpType;
 import com.zdj.net_frame.interface_top.IHttpListener;
 import com.zdj.net_frame.interface_top.IHttpRequest;
 
@@ -14,17 +16,23 @@ import java.net.URL;
  * <pre>
  *     author : dejinzhang
  *     time : 2021/03/09
- *     desc : 数据格式为Json的并采用HttpUrlConnection的请求
+ *     desc : 采用HttpUrlConnection的请求
  * </pre>
  */
-public class JsonHttpUrlConnectionRequest implements IHttpRequest {
+public class HttpUrlConnectionRequest implements IHttpRequest {
     private String url;
+    private String type;
     private byte[] params;
     private IHttpListener iHttpListener;
 
     @Override
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
@@ -50,18 +58,21 @@ public class JsonHttpUrlConnectionRequest implements IHttpRequest {
         try {
             URL url = new URL(this.url);
             httpURLConnection = (HttpURLConnection) url.openConnection();
-            httpURLConnection.setRequestMethod("POST");
-            httpURLConnection.setDoOutput(true);
             httpURLConnection.setConnectTimeout(10000);
             httpURLConnection.setReadTimeout(20000);
             httpURLConnection.setUseCaches(false);
             httpURLConnection.setRequestProperty("Content-Type", "application/octet-stream");
-
-            outputStream = httpURLConnection.getOutputStream();
-            //我们可以使用缓冲流包装下，当然不用也行
-            bos = new BufferedOutputStream(outputStream);
-            bos.write(params);
-            bos.flush();
+            httpURLConnection.setRequestMethod(type);
+            if (!HttpType.GET_TYPE.equals(type)) {
+                httpURLConnection.setDoOutput(true);
+                outputStream = httpURLConnection.getOutputStream();
+                //我们可以使用缓冲流包装下，当然不用也行
+                bos = new BufferedOutputStream(outputStream);
+                bos.write(params);
+                bos.flush();
+            } else {
+                httpURLConnection.connect();
+            }
             if (httpURLConnection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                 inputStream = httpURLConnection.getInputStream();
                 iHttpListener.onSuccess(inputStream);
@@ -69,7 +80,6 @@ public class JsonHttpUrlConnectionRequest implements IHttpRequest {
                 throw new RuntimeException("请求失败");
             }
         } catch (Exception e) {
-            e.printStackTrace();
             throw new RuntimeException("请求失败");
         } finally {
             try {

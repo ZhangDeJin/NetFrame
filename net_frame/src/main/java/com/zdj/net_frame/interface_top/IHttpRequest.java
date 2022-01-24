@@ -9,6 +9,7 @@ package com.zdj.net_frame.interface_top;
  */
 public interface IHttpRequest {
     void setUrl(String url);
+    void setType(String type);
     void setParams(byte[] params);
     void setListener(IHttpListener iHttpListener);
     void execute();

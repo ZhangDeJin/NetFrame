@@ -2,11 +2,14 @@ package com.zdj.demo;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.zdj.demo.bean.RequestBean;
 import com.zdj.demo.bean.ResponseBean;
+import com.zdj.demo.util.UiUtils;
 import com.zdj.net_frame.IDataListener;
 import com.zdj.net_frame.ZdjApi;
 
@@ -34,6 +37,20 @@ public class MainActivity extends AppCompatActivity {
 
                 }
             });
+        });
+
+        ImageView iv = findViewById(R.id.iv);
+        String url = "https://t7.baidu.com/it/u=2621658848,3952322712&fm=193&f=GIF";
+        ZdjApi.loadImage(url, (int) UiUtils.dpToPx(this, 60), (int)UiUtils.dpToPx(this, 60), new IDataListener<Bitmap>() {
+            @Override
+            public void onSuccess(Bitmap bitmap) {
+                iv.setImageBitmap(bitmap);
+            }
+
+            @Override
+            public void onFailure() {
+
+            }
         });
     }
 }

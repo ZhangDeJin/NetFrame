@@ -1,5 +1,6 @@
 package com.zdj.net_frame.implementations;
 
+import com.zdj.net_frame.common.HttpType;
 import com.zdj.net_frame.interface_top.IHttpListener;
 import com.zdj.net_frame.interface_top.IHttpRequest;
 
@@ -16,17 +17,23 @@ import okhttp3.Response;
  * <pre>
  *     author : dejinzhang
  *     time : 2022/01/10
- *     desc : 数据格式为Json的并采用OkHttp的请求
+ *     desc : 并采用OkHttp的请求
  * </pre>
  */
-public class JsonOkHttpRequest implements IHttpRequest {
+public class OkHttpRequest implements IHttpRequest {
     private String url;
+    private String type;
     private byte[] params;
     private IHttpListener iHttpListener;
 
     @Override
     public void setUrl(String url) {
         this.url = url;
+    }
+
+    @Override
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
@@ -42,11 +49,18 @@ public class JsonOkHttpRequest implements IHttpRequest {
     @Override
     public void execute() {
         OkHttpClient client = new OkHttpClient();
-        RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), params);
-        Request request = new Request.Builder()
-                .url(url)
-                .post(requestBody)
-                .build();
+        Request request = null;
+        if (!HttpType.GET_TYPE.equals(type)) {
+            RequestBody requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf-8"), params);
+            request = new Request.Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .build();
+        } else {
+            request = new Request.Builder()
+                    .url(url)
+                    .build();
+        }
         Call call = client.newCall(request);
         try {
             Response response  = call.execute();
